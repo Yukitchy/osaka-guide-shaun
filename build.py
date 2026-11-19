@@ -4,7 +4,7 @@ import json, pathlib, urllib.parse
 
 HERE = pathlib.Path(__file__).parent
 PAGE_URL = "https://yukitchy.github.io/osaka-guide-shaun/"
-OG_IMAGE = PAGE_URL + "img/og-1.jpg"  # PROVISIONAL (candidate 1) until Yuuki picks
+OG_IMAGE = PAGE_URL + "img/og-neon.jpg"  # candidate 2 (Neon Full), picked by Yuuki 2026-11-19
 
 CSS = """
 :root{--ink:#111;--paper:#faf8f4;--red:#c8102e;--line:#111;--mut:#5a554d}
@@ -27,13 +27,12 @@ h1 .accent{color:var(--red)}
 .facts b{flex:0 0 64px;font-size:11px;letter-spacing:.18em;color:var(--red);padding-top:3px}
 h2{font-family:Georgia,serif;font-size:27px;margin:38px 0 4px;white-space:nowrap}
 .lede{font-size:14.5px;color:var(--mut);margin-bottom:16px}
-.mapbox{border:2.5px solid var(--ink);background:#101426;position:relative}
-.mapbox svg{width:100%;height:auto;display:block}
-.pin{cursor:pointer}
-.pin .hd{fill:#111}
-.pin text{fill:#fff;font-family:Verdana,sans-serif;font-weight:bold}
-.pin .ph{stroke:#fff;stroke-width:2}
-.pin .tail{fill:#fff}
+.mapbox{border:2.5px solid var(--ink);position:relative;background:#e8e4da}
+#map-stops{height:360px;z-index:0}
+.tpin{width:56px;cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+.tpin .hd{background:#111;color:#fff;font:700 10px/14px Verdana,Geneva,sans-serif;text-align:center;height:14px;letter-spacing:.1em}
+.tpin img{width:56px;height:38px;object-fit:cover;border:2px solid #fff;border-top:0}
+.tpin .tl{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid #fff;margin:0 auto}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:20px}
 .card{border:2.5px solid var(--ink);background:#fff}
 .card .ph{position:relative}
@@ -72,6 +71,7 @@ h2{font-family:Georgia,serif;font-size:27px;margin:38px 0 4px;white-space:nowrap
  .card .ph img{height:200px}
  .tile .tm{flex-direction:column;align-items:flex-start;gap:4px}
  .tile .tn{font-size:14px}
+ #map-stops{height:300px}
 }
 """
 
@@ -81,29 +81,25 @@ PIN = '<svg viewBox="0 0 24 24" fill="#c8102e"><path d="M12 2a7 7 0 0 0-7 7c0 5.
 def gmap_url(q):
     return "https://www.google.com/maps/search/?api=1&query=" + urllib.parse.quote(q)
 
-# lat/lng -> static map projection (viewBox 600x460)
-def proj(lat, lng):
-    x = (lng - 135.495) / 0.040 * 600
-    y = (34.695 - lat) / 0.055 * 460
-    return x, y
+# Leaflet pins are rendered client-side from SPOTS lat/lng (see MAP_SCRIPT below)
 
 SPOTS = [
     dict(n=1, name="MANDARAKE GRAND CHAOS", genre="USED MANGA & TOYS", hrs="12:00–20:00",
-         img="img/mandarake.jpg", alt="A side street in Den Den Town, Osaka, lined with electronics and hobby shops (photo by Yuuki)",
+         img="img/mandarake-grand-chaos.jpg", alt="The red Mandarake Grand Chaos storefront in Den Den Town, Osaka — the vertical sign reads Mandarake Grand Chaos (photo by Lisa Pinehill, CC BY-SA 2.0)",
          text="Den Den Town's Mandarake: floors of second-hand manga, figures and toys. If you collect, this is the one to dig through.",
-         area="Nipponbashi 4-12-6, Den Den Town", q="Mandarake Grand Chaos Osaka", lat=34.6569, lng=135.5047, dx=-10, dy=11),
+         area="Nipponbashi 4-12-6, Den Den Town", q="Mandarake Grand Chaos Osaka", lat=34.659162, lng=135.505482, dx=-10, dy=11),
     dict(n=2, name="ANIMATE OSAKA NIPPONBASHI", genre="NEW RELEASES & GOODS", hrs="11:00–20:00",
-         img="img/anime-shop.jpg", alt="Character standees and goods shelves inside an anime shop in Den Den Town, Osaka (photo by Yuuki)",
+         img="img/animate-osaka-nipponbashi.jpg", alt="The animate Osaka Nipponbashi storefront, with the big blue animate sign over the entrance (photo by Tokumeigakarinoaoshima, CC BY-SA 4.0)",
          text="The big Osaka animate, right in Den Den Town: new releases, character goods and event corners. Opens at 10:00 on weekends and holidays.",
-         area="Nipponbashinishi 1-1-3, Den Den Town", q="Animate Osaka Nipponbashi", lat=34.6617, lng=135.5007, dx=-37, dy=-13),
+         area="Nipponbashinishi 1-1-3, Den Den Town", q="Animate Osaka Nipponbashi", lat=34.6611, lng=135.5010, dx=-37, dy=-13),
     dict(n=3, name="SUPER POTATO OTAROAD", genre="RETRO GAMES", hrs="11:00–20:00",
-         img="img/superpotato.jpg", alt="Retro game shelves inside Super Potato — photo of the same chain's Akihabara shop (Wikimedia Commons)",
-         text="Retro game heaven on Otaroad: Famicom to PlayStation, boxed and loose. Opens at 10:00 on weekends and holidays. (Photo shows the same chain's Akihabara shop.)",
-         area="Nipponbashi 3-8-18, Otaroad", q="Super Potato Otaroad Osaka", lat=34.6627, lng=135.5033, dx=60, dy=-55),
+         img="img/super-potato-otaroad.jpg", alt="The Super Potato Retro-kan storefront on Otaroad in Den Den Town, Osaka, with the Mario statue by the door (photo by Sergiy Galyonkin, CC BY-SA 2.0)",
+         text="Retro game heaven on Otaroad: Famicom to PlayStation, boxed and loose. Opens at 10:00 on weekends and holidays.",
+         area="Nipponbashi 3-8-18, Otaroad", q="Super Potato Otaroad Osaka", lat=34.66196, lng=135.50506, dx=60, dy=-55),
     dict(n=4, name="DOTONBORI", genre="NEON, SIGNS & STREET FOOD", hrs="Always open",
          img="img/dotonbori.jpg", alt="The Dotonbori canal and the Glico running man sign at night (Wikimedia Commons)",
          text="The canal, the Glico runner and a wall of giant signs: Osaka's postcard. Best after dark, and the food streets around it never really sleep.",
-         area="Ebisu Bridge, Namba", q="Dotonbori Glico Sign Osaka", lat=34.6689, lng=135.5012, dx=-23, dy=-38),
+         area="Ebisu Bridge, Namba", q="Dotonbori Glico Sign Osaka", lat=34.6687, lng=135.5013, dx=-23, dy=-38),
     dict(n=5, name="OSAKA CASTLE", genre="CASTLE & MUSEUM", hrs="9:00–18:00",
          img="img/castle.jpg", alt="The Osaka Castle keep (photo by Yuuki)",
          text="The keep is a museum inside and the best lookout in Osaka. Last entry 17:30, and the keep is closed Dec 28 – Jan 1.",
@@ -129,15 +125,6 @@ FOODS = [
          alt="A bowl of tonkotsu ramen at Kinryu Ramen, Dotonbori (Wikimedia Commons)", q="金龍ラーメン 道頓堀店"),
 ]
 
-def pin_svg(s):
-    x, y = proj(s["lat"], s["lng"])
-    x += s.get("dx", 0); y += s.get("dy", 0)
-    w, h, hd = 84, 56, 15
-    return f'''<g class="pin" transform="translate({x-w/2:.0f},{y-h-12:.0f})">
-<rect class="hd" x="0" y="0" width="{w}" height="{hd}"/><text x="{w/2}" y="12" font-size="11" text-anchor="middle">{s["n"]:02d}</text>
-<image class="ph" href="{s["img"]}" x="2" y="{hd+2}" width="{w-4}" height="{h-hd-2}" preserveAspectRatio="xMidYMid slice"/>
-<path class="tail" d="M{w/2-7},{h} L{w/2+7},{h} L{w/2},{h+12} Z"/></g>'''
-
 def card(s):
     return f'''<article class="card"><div class="ph"><img src="{s["img"]}" alt="{s["alt"]}" loading="lazy">
 <a class="gmap" href="{gmap_url(s["q"])}" target="_blank" rel="noopener" aria-label="Open {s["name"]} in Google Maps">{PIN}</a></div>
@@ -149,7 +136,9 @@ def tile(f):
     return f'''<a class="tile" href="{gmap_url(f["q"])}" target="_blank" rel="noopener"><img src="{f["img"]}" alt="{f["alt"]}" loading="lazy">
 <span class="tg">{f["tag"]}</span><span class="tm"><span class="tn">{f["name"]}</span><span class="tc">{f["hrs"]}</span></span></a>'''
 
-map_pins = "\n".join(pin_svg(s) for s in SPOTS)
+pins_js = ",\n".join(
+    f'{{lat:{s["lat"]},lng:{s["lng"]},n:"{s["n"]:02d}",img:"{s["img"]}",url:"{gmap_url(s["q"])}"}}'
+    for s in SPOTS)
 cards = "\n".join(card(s) for s in SPOTS)
 tiles = "\n".join(tile(f) for f in FOODS)
 
@@ -165,6 +154,7 @@ html = f'''<!DOCTYPE html>
 <meta property="og:image" content="{OG_IMAGE}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23111426'/><text x='50' y='70' font-size='58' text-anchor='middle' fill='%23ffffff' font-family='Georgia'>O</text></svg>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>{CSS}</style></head>
 <body>
 <header class="hero">
@@ -190,14 +180,7 @@ html = f'''<!DOCTYPE html>
 
 <h2>Six stops on one map</h2>
 <p class="lede">Tap a pin or a card — everything opens in Google Maps.</p>
-<div class="mapbox"><svg viewBox="0 0 600 460" role="img" aria-label="Map of the six stops in Osaka">
-<rect width="600" height="460" fill="#101426"/>
-<g stroke="#232c4d" stroke-width="1"><path d="M0,80 H600M0,170 H600M0,260 H600M0,350 H600M0,430 H600M90,0 V460M200,0 V460M310,0 V460M420,0 V460M520,0 V460"/></g>
-<path d="M468,72 C380,120 260,180 150,300" stroke="#37e6ff" stroke-width="2.5" fill="none" stroke-dasharray="7 6" opacity="0.65"/>
-<text x="18" y="34" fill="#8fa3d9" font-size="13" font-family="Verdana" letter-spacing="2">OSAKA</text>
-<text x="592" y="440" fill="#5b6b99" font-size="10.5" font-family="Verdana" text-anchor="end">castle → east · namba → south-west</text>
-{map_pins}
-</svg></div>
+<div class="mapbox"><div id="map-stops" role="img" aria-label="Map of the six stops in Osaka"></div></div>
 
 <div class="cards">
 {cards}
@@ -224,22 +207,45 @@ html = f'''<!DOCTYPE html>
 
 <footer class="foot">
 <p>Picked by Yuuki (Anime Sensei) for Shaun, November 2026. Opening hours checked against official shop and facility sites in November 2026 — they can change, so a quick check on the day is wise. No prices on this page: they move too fast to print.</p>
-<p>Photo credits — Yuuki's own photos: hero (Osaka Castle, Shinsaibashi-suji, Tsutenkaku), Mandarake card (a Den Den Town side street), animate card (an anime shop in Den Den Town), Osaka Castle card, Tsutenkaku card, takoyaki and okonomiyaki tiles. Wikimedia Commons: Dotonbori card — Martin Falbisoner, CC BY-SA 4.0; Super Potato card — IQRemix, CC BY-SA 2.0 (the chain's Akihabara shop); kushikatsu tile — Aiko99ann, CC BY-SA 3.0; 551 Horai tile — Tokumeigakarinoaoshima, CC BY-SA 4.0; cheesecake tile — Ocdp, CC0; ramen tile — Guilhem Vellut, CC BY 2.0.</p>
+<p>Photo credits — Yuuki's own photos: hero (Osaka Castle, Shinsaibashi-suji, Tsutenkaku), Osaka Castle card, Tsutenkaku card, takoyaki and okonomiyaki tiles. Mandarake Grand Chaos card — Lisa Pinehill / Flickr, CC BY-SA 2.0. Animate Osaka Nipponbashi card — Tokumeigakarinoaoshima via Wikimedia Commons, CC BY-SA 4.0 (cropped). Super Potato card — Sergiy Galyonkin / Flickr, CC BY-SA 2.0 (cropped). Dotonbori card — Martin Falbisoner via Wikimedia Commons, CC BY-SA 4.0; kushikatsu tile — Aiko99ann, CC BY-SA 3.0; 551 Horai tile — Tokumeigakarinoaoshima, CC BY-SA 4.0; cheesecake tile — Ocdp, CC0; ramen tile — Guilhem Vellut, CC BY 2.0. Map © OpenStreetMap contributors.</p>
 </footer>
 </div>
+__MAPSCRIPT__
 </body></html>'''
+
+MAP_SCRIPT = '''<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+if(!window.L) return;
+var m=L.map('map-stops',{scrollWheelZoom:false,attributionControl:true});
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19}).addTo(m);
+function tpin(n,img){return L.divIcon({className:'',html:'<div class="tpin"><div class="hd">'+n+'</div><img src="'+img+'" alt=""><div class="tl"></div></div>',iconSize:[56,63],iconAnchor:[28,63]});}
+var PINS=[
+__PINS__
+];
+var pts=[];
+PINS.forEach(function(p){
+  pts.push([p.lat,p.lng]);
+  var mk=L.marker([p.lat,p.lng],{icon:tpin(p.n,p.img)}).addTo(m);
+  mk.on('click',function(){window.open(p.url,'_blank');});
+});
+m.fitBounds(L.latLngBounds(pts).pad(0.08));
+})();
+</script>'''
+
+html = html.replace("__MAPSCRIPT__", MAP_SCRIPT.replace("__PINS__", pins_js))
 
 (HERE / "index.html").write_text(html)
 credits = {
     "img/hero-castle.jpg": "Yuuki (Immich d920aaa0)",
     "img/hero-street.jpg": "Yuuki (Immich d8bacbdc)",
     "img/tsutenkaku.jpg": "Yuuki (Immich 0f91b9b0)",
-    "img/mandarake.jpg": "Yuuki (Immich cc6b6c4d) — Den Den Town side street",
-    "img/anime-shop.jpg": "Yuuki (Immich 57764c4f) — anime shop interior in Den Den Town",
+    "img/mandarake-grand-chaos.jpg": "Flickr — Lisa Pinehill, CC BY-SA 2.0 (Mandarake Grand Chaos storefront, Nipponbashi; via roamosaka.com)",
+    "img/animate-osaka-nipponbashi.jpg": "Wikimedia Commons — Tokumeigakarinoaoshima, CC BY-SA 4.0 (Animate Osaka Nipponbashi storefront; cropped)",
+    "img/super-potato-otaroad.jpg": "Flickr — Sergiy Galyonkin, CC BY-SA 2.0 (Super Potato Retro-kan storefront, Otaroad, Osaka; cropped)",
     "img/castle.jpg": "Yuuki (Immich 2f0bb069)",
     "img/food-takoyaki.jpg": "Yuuki (Immich 4e2f7766) — takoyaki on the grill",
     "img/dotonbori.jpg": "Wikimedia Commons — Martin Falbisoner, CC BY-SA 4.0",
-    "img/superpotato.jpg": "Wikimedia Commons — IQRemix, CC BY-SA 2.0 (Super Potato Akihabara shop)",
     "img/food-okonomiyaki.jpg": "Yuuki (Immich 3b9f2560) — okonomiyaki at a counter in Osaka",
     "img/food-kushikatsu.jpg": "Wikimedia Commons — Aiko99ann, CC BY-SA 3.0 (Kushikatsu Daruma)",
     "img/food-551.jpg": "Wikimedia Commons — Tokumeigakarinoaoshima, CC BY-SA 4.0 (551 Horai head store)",
