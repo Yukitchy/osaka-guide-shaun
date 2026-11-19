@@ -93,7 +93,7 @@ SPOTS = [
          text="The big Osaka animate, right in Den Den Town: new releases, character goods and event corners. Opens at 10:00 on weekends and holidays.",
          area="Nipponbashinishi 1-1-3, Den Den Town", q="Animate Osaka Nipponbashi", lat=34.6611, lng=135.5010, dx=-37, dy=-13),
     dict(n=3, name="SUPER POTATO OTAROAD", genre="RETRO GAMES", hrs="11:00–20:00",
-         img="img/super-potato-otaroad.jpg", alt="The Super Potato Retro-kan storefront on Otaroad in Den Den Town, Osaka, with the Mario statue by the door (photo by Sergiy Galyonkin, CC BY-SA 2.0)",
+         img="img/super-potato-otaroad-color.jpg", alt="The Super Potato Retro-kan storefront on Otaroad in Den Den Town, Osaka, with the Mario statue by the door (photo: Super Potato official website)",
          text="Retro game heaven on Otaroad: Famicom to PlayStation, boxed and loose. Opens at 10:00 on weekends and holidays.",
          area="Nipponbashi 3-8-18, Otaroad", q="Super Potato Otaroad Osaka", lat=34.66196, lng=135.50506, dx=60, dy=-55),
     dict(n=4, name="DOTONBORI", genre="NEON, SIGNS & STREET FOOD", hrs="Always open",
@@ -207,7 +207,7 @@ html = f'''<!DOCTYPE html>
 
 <footer class="foot">
 <p>Picked by Yuuki (Anime Sensei) for Shaun, November 2026. Opening hours checked against official shop and facility sites in November 2026 — they can change, so a quick check on the day is wise. No prices on this page: they move too fast to print.</p>
-<p>Photo credits — Yuuki's own photos: hero (Osaka Castle, Shinsaibashi-suji, Tsutenkaku), Osaka Castle card, Tsutenkaku card, takoyaki and okonomiyaki tiles. Mandarake Grand Chaos card — Lisa Pinehill / Flickr, CC BY-SA 2.0. Animate Osaka Nipponbashi card — Tokumeigakarinoaoshima via Wikimedia Commons, CC BY-SA 4.0 (cropped). Super Potato card — Sergiy Galyonkin / Flickr, CC BY-SA 2.0 (cropped). Dotonbori card — Martin Falbisoner via Wikimedia Commons, CC BY-SA 4.0; kushikatsu tile — Aiko99ann, CC BY-SA 3.0; 551 Horai tile — Tokumeigakarinoaoshima, CC BY-SA 4.0; cheesecake tile — Ocdp, CC0; ramen tile — Guilhem Vellut, CC BY 2.0. Map © OpenStreetMap contributors.</p>
+<p>Photo credits — Yuuki's own photos: hero (Osaka Castle, Shinsaibashi-suji, Tsutenkaku), Osaka Castle card, Tsutenkaku card, takoyaki and okonomiyaki tiles. Mandarake Grand Chaos card — Lisa Pinehill / Flickr, CC BY-SA 2.0. Animate Osaka Nipponbashi card — Tokumeigakarinoaoshima via Wikimedia Commons, CC BY-SA 4.0 (cropped). Super Potato card — Super Potato official website, superpotato.com (cropped). Dotonbori card — Martin Falbisoner via Wikimedia Commons, CC BY-SA 4.0; kushikatsu tile — Aiko99ann, CC BY-SA 3.0; 551 Horai tile — Tokumeigakarinoaoshima, CC BY-SA 4.0; cheesecake tile — Ocdp, CC0; ramen tile — Guilhem Vellut, CC BY 2.0. Map © OpenStreetMap contributors.</p>
 </footer>
 </div>
 __MAPSCRIPT__
@@ -242,7 +242,7 @@ credits = {
     "img/tsutenkaku.jpg": "Yuuki (Immich 0f91b9b0)",
     "img/mandarake-grand-chaos.jpg": "Flickr — Lisa Pinehill, CC BY-SA 2.0 (Mandarake Grand Chaos storefront, Nipponbashi; via roamosaka.com)",
     "img/animate-osaka-nipponbashi.jpg": "Wikimedia Commons — Tokumeigakarinoaoshima, CC BY-SA 4.0 (Animate Osaka Nipponbashi storefront; cropped)",
-    "img/super-potato-otaroad.jpg": "Flickr — Sergiy Galyonkin, CC BY-SA 2.0 (Super Potato Retro-kan storefront, Otaroad, Osaka; cropped)",
+    "img/super-potato-otaroad-color.jpg": "Super Potato official website (superpotato.com) — Super Potato Retro-kan Otaroad storefront, Nipponbashi, Osaka; cropped",
     "img/castle.jpg": "Yuuki (Immich 2f0bb069)",
     "img/food-takoyaki.jpg": "Yuuki (Immich 4e2f7766) — takoyaki on the grill",
     "img/dotonbori.jpg": "Wikimedia Commons — Martin Falbisoner, CC BY-SA 4.0",
